@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trading Card Maker</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <section class="preview-panel" aria-label="カードプレビュー">
+        <div class="preview-wrap">
+          <canvas id="cardCanvas" width="1024" height="1536" aria-label="作成中のカード"></canvas>
+        </div>
+        <div class="actions">
+          <button id="downloadButton" type="button">PNG保存</button>
+          <button id="resetButton" type="button" class="secondary">入力をリセット</button>
+        </div>
+      </section>
+
+      <section class="editor-panel" aria-label="カード編集">
+        <header>
+          <h1>カードメーカー</h1>
+          <p>固定テンプレートに画像と文字を合成してPNG保存します。</p>
+        </header>
+
+        <form id="cardForm">
+          <fieldset>
+            <legend>画像</legend>
+            <label class="file-input">
+              <span>キャラクター画像</span>
+              <input id="imageUpload" type="file" accept="image/*">
+            </label>
+            <div class="control-grid">
+              <label>
+                拡大縮小
+                <input name="imageScale" type="range" min="0.5" max="3" step="0.01">
+              </label>
+              <label>
+                左右移動
+                <input name="imageX" type="range" min="-500" max="500" step="1">
+              </label>
+              <label>
+                上下移動
+                <input name="imageY" type="range" min="-500" max="500" step="1">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>基本情報</legend>
+            <div class="control-grid two">
+              <label>
+                カード名
+                <input name="cardName" type="text" maxlength="32">
+              </label>
+              <label>
+                レアリティ
+                <select name="rarity">
+                  <option value="N">N</option>
+                  <option value="R">R</option>
+                  <option value="SR">SR</option>
+                  <option value="SSR">SSR</option>
+                  <option value="UR">UR</option>
+                </select>
+              </label>
+              <label>
+                カード分類
+                <select name="cardType">
+                  <option value="character">キャラ</option>
+                  <option value="item">アイテム</option>
+                </select>
+              </label>
+              <label>
+                属性
+                <select name="attribute">
+                  <option value="火">火</option>
+                  <option value="水">水</option>
+                  <option value="風">風</option>
+                  <option value="雷">雷</option>
+                  <option value="光">光</option>
+                  <option value="闇">闇</option>
+                  <option value="心">心</option>
+                  <option value="星">星</option>
+                  <option value="無属性">無属性</option>
+                </select>
+              </label>
+              <label>
+                カードNo.
+                <input name="cardNo" type="text" maxlength="24">
+              </label>
+              <label>
+                コスト
+                <input name="cost" type="text" inputmode="numeric" maxlength="8">
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>ステータス</legend>
+            <div class="control-grid four">
+              <label>HP<input name="hp" type="text" inputmode="numeric" maxlength="8"></label>
+              <label>ATK<input name="atk" type="text" inputmode="numeric" maxlength="8"></label>
+              <label>DEF<input name="def" type="text" inputmode="numeric" maxlength="8"></label>
+              <label>SPD<input name="spd" type="text" inputmode="numeric" maxlength="8"></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>技・能力</legend>
+            <div class="control-grid two">
+              <label>
+                通常技名
+                <input name="normalSkillName" type="text" maxlength="24">
+              </label>
+              <label>
+                通常技の威力
+                <input name="normalSkillPower" type="text" maxlength="12">
+              </label>
+            </div>
+            <label>
+              通常技説明
+              <textarea name="normalSkillText" rows="3" maxlength="120"></textarea>
+            </label>
+            <label>
+              特殊能力名
+              <input name="specialName" type="text" maxlength="28">
+            </label>
+            <label>
+              特殊能力説明
+              <textarea name="specialText" rows="3" maxlength="140"></textarea>
+            </label>
+            <label>
+              キャラクター説明文
+              <textarea name="description" rows="4" maxlength="160"></textarea>
+            </label>
+          </fieldset>
+        </form>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
