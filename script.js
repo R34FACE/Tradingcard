@@ -2,6 +2,7 @@ const CARD_WIDTH = 1024;
 const CARD_HEIGHT = 1536;
 const STORAGE_KEY = "tradingCardMakerState";
 const IMAGE_KEY = "tradingCardMakerImage";
+const TEMPLATE_CACHE_VERSION = "20260619";
 
 const rarityMap = {
   N: { label: "N", file: "normal.png", color: "#7d8790" },
@@ -16,7 +17,7 @@ const defaults = {
   imageX: "0",
   imageY: "0",
   cardName: "エレキュート",
-  rarity: "SSR",
+  rarity: "R",
   cardType: "character",
   attribute: "雷",
   cardNo: "No.001",
@@ -137,19 +138,33 @@ async function loadTemplate() {
   templateKey = getTemplateKey();
   templateImage = null;
 
-  const paths = [
-    `./assets/templates/${state.cardType}/${rarity.file}`,
-    `./assets/templates/${rarity.file}`
-  ];
+  const templatePaths = [
+    getTemplatePath(state.cardType, rarity.file),
+    getTemplatePath("character", rarityMap.R.file)
+  ].filter((path, index, paths) => paths.indexOf(path) === index);
 
-  for (const path of paths) {
+  for (const templatePath of templatePaths) {
+    const templateUrl = withTemplateCacheBuster(templatePath);
+
     try {
-      templateImage = await loadImage(path);
+      console.log(`Loading card template URL: ${templateUrl}`);
+      templateImage = await loadImage(templateUrl);
+      console.log(`Loaded card template URL: ${templateUrl}`);
       return;
-    } catch {
+    } catch (error) {
       templateImage = null;
+      console.error(`Failed to load card template URL: ${templateUrl}`, error);
     }
   }
+}
+
+function getTemplatePath(cardType, rarityFile) {
+  const safeCardType = cardType === "item" ? "item" : "character";
+  return `assets/templates/${safeCardType}/${rarityFile}`;
+}
+
+function withTemplateCacheBuster(path) {
+  return `./${path}?v=${TEMPLATE_CACHE_VERSION}`;
 }
 
 function loadImage(src) {
@@ -163,6 +178,13 @@ function loadImage(src) {
 
 function drawCard() {
   ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+
+  if (templateImage) {
+    drawCharacterImage({ drawBackground: false, drawPlaceholder: false, drawFrame: false });
+    drawTemplateOverlay();
+    return;
+  }
+
   drawBase();
   drawCharacterImage();
   drawTemplateOverlay();
@@ -196,17 +218,19 @@ function drawBase() {
   ctx.restore();
 }
 
-function drawCharacterImage() {
+function drawCharacterImage({ drawBackground = true, drawPlaceholder = true, drawFrame = true } = {}) {
   const imageBox = { x: 96, y: 196, w: 832, h: 694 };
   ctx.save();
   roundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, 26);
   ctx.clip();
 
-  const bg = ctx.createLinearGradient(96, 196, 928, 890);
-  bg.addColorStop(0, "#fff7cf");
-  bg.addColorStop(1, "#b58a54");
-  ctx.fillStyle = bg;
-  ctx.fillRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h);
+  if (drawBackground) {
+    const bg = ctx.createLinearGradient(96, 196, 928, 890);
+    bg.addColorStop(0, "#fff7cf");
+    bg.addColorStop(1, "#b58a54");
+    ctx.fillStyle = bg;
+    ctx.fillRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h);
+  }
 
   if (characterImage) {
     const scale = Number(state.imageScale || 1);
@@ -216,7 +240,7 @@ function drawCharacterImage() {
     const drawX = imageBox.x + imageBox.w / 2 - drawW / 2 + Number(state.imageX || 0);
     const drawY = imageBox.y + imageBox.h / 2 - drawH / 2 + Number(state.imageY || 0);
     ctx.drawImage(characterImage, drawX, drawY, drawW, drawH);
-  } else {
+  } else if (drawPlaceholder) {
     ctx.fillStyle = "rgba(255,255,255,0.5)";
     ctx.font = makeFont(42, 800);
     ctx.textAlign = "center";
@@ -227,8 +251,10 @@ function drawCharacterImage() {
   }
   ctx.restore();
 
-  strokeRoundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, 26, "#3a2112", 8);
-  strokeRoundRect(imageBox.x + 12, imageBox.y + 12, imageBox.w - 24, imageBox.h - 24, 18, "rgba(255,255,255,0.55)", 3);
+  if (drawFrame) {
+    strokeRoundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, 26, "#3a2112", 8);
+    strokeRoundRect(imageBox.x + 12, imageBox.y + 12, imageBox.w - 24, imageBox.h - 24, 18, "rgba(255,255,255,0.55)", 3);
+  }
 }
 
 function drawTemplateOverlay() {
