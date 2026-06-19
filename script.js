@@ -12,6 +12,58 @@ const rarityMap = {
   UR: { label: "UR", file: "ultra-rare.png", color: "#c82424" }
 };
 
+const DEBUG_LAYOUT = false;
+
+const TEMPLATE_LAYOUT = {
+  character: {
+    R: {
+      mainImage: { x: 92, y: 190, w: 840, h: 690, radius: 26 },
+      cardName: { x: 512, y: 118, maxWidth: 510, fontSize: 48, align: "center", color: "#fff7db", weight: 900 },
+      stats: {
+        hp: { x: 308, y: 943, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
+        atk: { x: 308, y: 1013, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
+        def: { x: 308, y: 1083, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
+        spd: { x: 308, y: 1153, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 }
+      },
+      skill1: {
+        nameX: 410,
+        nameY: 1034,
+        nameMaxWidth: 330,
+        nameFontSize: 34,
+        powerX: 830,
+        powerY: 1034,
+        powerMaxWidth: 92,
+        powerFontSize: 38,
+        textX: 360,
+        textY: 1080,
+        textMaxWidth: 470,
+        textHeight: 88,
+        textFontSize: 23,
+        lineHeight: 29,
+        maxLines: 3
+      },
+      skill2: {
+        nameX: 400,
+        nameY: 1195,
+        nameMaxWidth: 400,
+        nameFontSize: 32,
+        textX: 360,
+        textY: 1240,
+        textMaxWidth: 470,
+        textHeight: 88,
+        textFontSize: 23,
+        lineHeight: 29,
+        maxLines: 3
+      },
+      description: { x: 65, y: 1295, maxWidth: 560, height: 112, fontSize: 24, lineHeight: 34, maxLines: 3, color: "#fff8e3", weight: 700 },
+      attribute: { x: 893, y: 126, radius: 52, fontSize: 38, color: "#fffdf0", weight: 900 },
+      miniCharacter: { x: 855, y: 1325, radius: 120 },
+      cost: { x: 932, y: 1145, maxWidth: 64, fontSize: 28, color: "#fffdf0", weight: 900 },
+      cardNo: { x: 512, y: 1480, maxWidth: 230, fontSize: 34, align: "center", color: "#2a190f", weight: 900 }
+    }
+  }
+};
+
 const defaults = {
   imageScale: "1",
   imageX: "0",
@@ -180,8 +232,16 @@ function drawCard() {
   ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
 
   if (templateImage) {
-    drawCharacterImage({ drawBackground: false, drawPlaceholder: false, drawFrame: false });
+    const layout = getTemplateLayout();
+    drawCharacterImage({
+      imageBox: layout.mainImage,
+      drawBackground: false,
+      drawPlaceholder: false,
+      drawFrame: false
+    });
     drawTemplateOverlay();
+    drawTemplateTextLayer(layout);
+    drawDebugLayout(layout);
     return;
   }
 
@@ -189,6 +249,10 @@ function drawCard() {
   drawCharacterImage();
   drawTemplateOverlay();
   drawTextLayer();
+}
+
+function getTemplateLayout() {
+  return TEMPLATE_LAYOUT[state.cardType]?.[state.rarity] || TEMPLATE_LAYOUT.character.R;
 }
 
 function drawBase() {
@@ -218,10 +282,10 @@ function drawBase() {
   ctx.restore();
 }
 
-function drawCharacterImage({ drawBackground = true, drawPlaceholder = true, drawFrame = true } = {}) {
-  const imageBox = { x: 96, y: 196, w: 832, h: 694 };
+function drawCharacterImage({ imageBox = { x: 96, y: 196, w: 832, h: 694, radius: 26 }, drawBackground = true, drawPlaceholder = true, drawFrame = true } = {}) {
+  const radius = imageBox.radius ?? 26;
   ctx.save();
-  roundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, 26);
+  roundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, radius);
   ctx.clip();
 
   if (drawBackground) {
@@ -252,7 +316,7 @@ function drawCharacterImage({ drawBackground = true, drawPlaceholder = true, dra
   ctx.restore();
 
   if (drawFrame) {
-    strokeRoundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, 26, "#3a2112", 8);
+    strokeRoundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, radius, "#3a2112", 8);
     strokeRoundRect(imageBox.x + 12, imageBox.y + 12, imageBox.w - 24, imageBox.h - 24, 18, "rgba(255,255,255,0.55)", 3);
   }
 }
@@ -287,6 +351,77 @@ function drawTextLayer() {
   drawCardNo();
 }
 
+function drawTemplateTextLayer(layout) {
+  drawTemplateCardName(layout.cardName);
+  drawTemplateStats(layout.stats);
+  drawTemplateSkill1(layout.skill1);
+  drawTemplateSkill2(layout.skill2);
+  drawTemplateDescription(layout.description);
+  drawTemplateMiniCharacter(layout.miniCharacter);
+  drawTemplateCost(layout.cost);
+  drawTemplateCardNo(layout.cardNo);
+  drawTemplateAttribute(layout.attribute);
+}
+
+function drawTemplateCardName(layout) {
+  drawFitText(state.cardName, layout.x, layout.y, layout.maxWidth, layout.fontSize, layout.color, layout.weight, layout.align);
+}
+
+function drawTemplateStats(layout) {
+  [
+    ["hp", state.hp],
+    ["atk", state.atk],
+    ["def", state.def],
+    ["spd", state.spd]
+  ].forEach(([key, value]) => {
+    const statLayout = layout[key];
+    drawFitText(value, statLayout.x, statLayout.y, statLayout.maxWidth, statLayout.fontSize, statLayout.color, statLayout.weight, statLayout.align);
+  });
+}
+
+function drawTemplateSkill1(layout) {
+  drawFitText(state.normalSkillName || "通常技", layout.nameX, layout.nameY, layout.nameMaxWidth, layout.nameFontSize, "#fff8e3", 900, "left");
+  drawFitText(state.normalSkillPower || "", layout.powerX, layout.powerY, layout.powerMaxWidth, layout.powerFontSize, "#fff8e3", 900, "center");
+  drawWrappedFitText(state.normalSkillText, layout.textX, layout.textY, layout.textMaxWidth, layout.textHeight, layout.lineHeight, layout.maxLines, "#fff8e3", layout.textFontSize, 700);
+}
+
+function drawTemplateSkill2(layout) {
+  drawFitText(state.specialName || "特殊能力", layout.nameX, layout.nameY, layout.nameMaxWidth, layout.nameFontSize, "#fff8e3", 900, "left");
+  drawWrappedFitText(state.specialText, layout.textX, layout.textY, layout.textMaxWidth, layout.textHeight, layout.lineHeight, layout.maxLines, "#fff8e3", layout.textFontSize, 700);
+}
+
+function drawTemplateDescription(layout) {
+  drawWrappedFitText(state.description, layout.x, layout.y, layout.maxWidth, layout.height, layout.lineHeight, layout.maxLines, layout.color, layout.fontSize, layout.weight);
+}
+
+function drawTemplateMiniCharacter(layout) {
+  if (!characterImage) return;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(layout.x, layout.y, layout.radius, 0, Math.PI * 2);
+  ctx.clip();
+
+  const diameter = layout.radius * 2;
+  const fit = Math.max(diameter / characterImage.width, diameter / characterImage.height);
+  const drawW = characterImage.width * fit;
+  const drawH = characterImage.height * fit;
+  ctx.drawImage(characterImage, layout.x - drawW / 2, layout.y - drawH / 2, drawW, drawH);
+  ctx.restore();
+}
+
+function drawTemplateCost(layout) {
+  drawFitText(state.cost, layout.x, layout.y, layout.maxWidth, layout.fontSize, layout.color, layout.weight, "center");
+}
+
+function drawTemplateCardNo(layout) {
+  drawFitText(state.cardNo, layout.x, layout.y, layout.maxWidth, layout.fontSize, layout.color, layout.weight, layout.align);
+}
+
+function drawTemplateAttribute(layout) {
+  drawAttributeIcon(layout.x, layout.y, state.attribute, layout.radius, layout.fontSize);
+}
+
 function drawHeader() {
   const rarity = rarityMap[state.rarity] || rarityMap.N;
   ctx.textBaseline = "middle";
@@ -307,7 +442,7 @@ function drawHeader() {
   drawAttributeIcon(844, 130, state.attribute);
 }
 
-function drawAttributeIcon(x, y, attribute) {
+function drawAttributeIcon(x, y, attribute, radius = 48, maxFontSize = 38) {
   const colors = {
     火: "#d33d28",
     水: "#2478d4",
@@ -321,17 +456,13 @@ function drawAttributeIcon(x, y, attribute) {
   };
   ctx.fillStyle = colors[attribute] || colors.無属性;
   ctx.beginPath();
-  ctx.arc(x, y, 48, 0, Math.PI * 2);
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
   ctx.fill();
   ctx.lineWidth = 5;
   ctx.strokeStyle = "#fff4cf";
   ctx.stroke();
 
-  ctx.fillStyle = "#fffdf0";
-  ctx.font = makeFont(attribute === "無属性" ? 24 : 38, 900);
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(attribute, x, y + 1);
+  drawFitText(attribute, x, y + 1, radius * 1.45, attribute === "無属性" ? Math.min(24, maxFontSize) : maxFontSize, "#fffdf0", 900, "center");
 }
 
 function drawStats() {
@@ -449,6 +580,55 @@ function drawWrappedText(text, x, y, maxWidth, lineHeight, maxLines, color, size
   });
 }
 
+function drawWrappedFitText(text, x, y, maxWidth, maxHeight, lineHeight, maxLines, color, maxSize, weight) {
+  let size = maxSize;
+  let effectiveLineHeight = lineHeight;
+  let lines = [];
+
+  do {
+    effectiveLineHeight = Math.max(Math.round(lineHeight * (size / maxSize)), size + 4);
+    lines = wrapTextLines(text, maxWidth, size, weight, maxLines);
+    if (lines.length * effectiveLineHeight <= maxHeight || size <= 16) break;
+    size -= 2;
+  } while (size > 16);
+
+  ctx.fillStyle = color;
+  ctx.font = makeFont(size, weight);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  lines.slice(0, maxLines).forEach((line, index) => {
+    const nextY = y + index * effectiveLineHeight;
+    if (nextY + size <= y + maxHeight) {
+      ctx.fillText(line, x, nextY);
+    }
+  });
+}
+
+function wrapTextLines(text, maxWidth, size, weight, maxLines) {
+  const normalized = String(text || "").replace(/\r/g, "");
+  const paragraphs = normalized.split("\n");
+  const lines = [];
+
+  ctx.font = makeFont(size, weight);
+  for (const paragraph of paragraphs) {
+    let line = "";
+    for (const char of paragraph) {
+      const next = line + char;
+      if (ctx.measureText(next).width > maxWidth && line) {
+        lines.push(line);
+        line = char;
+      } else {
+        line = next;
+      }
+      if (lines.length >= maxLines) return lines;
+    }
+    lines.push(line);
+    if (lines.length >= maxLines) return lines;
+  }
+
+  return lines;
+}
+
 function drawFitText(text, x, y, maxWidth, maxSize, color, weight, align) {
   const value = String(text || "");
   let size = maxSize;
@@ -465,6 +645,76 @@ function drawFitText(text, x, y, maxWidth, maxSize, color, weight, align) {
 
 function makeFont(size, weight) {
   return `${weight} ${size}px "Yu Gothic", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif`;
+}
+
+function drawDebugLayout(layout) {
+  if (!DEBUG_LAYOUT) return;
+
+  drawDebugBox(layout.mainImage, "mainImage");
+  drawDebugTextGuide(layout.cardName, "cardName");
+  Object.entries(layout.stats).forEach(([key, value]) => drawDebugTextGuide(value, key));
+  drawDebugTextGuide({ x: layout.skill1.nameX, y: layout.skill1.nameY, maxWidth: layout.skill1.nameMaxWidth, fontSize: layout.skill1.nameFontSize, align: "left" }, "skill1.name");
+  drawDebugTextGuide({ x: layout.skill1.powerX, y: layout.skill1.powerY, maxWidth: layout.skill1.powerMaxWidth, fontSize: layout.skill1.powerFontSize, align: "center" }, "skill1.power");
+  drawDebugRect(layout.skill1.textX, layout.skill1.textY, layout.skill1.textMaxWidth, layout.skill1.textHeight, "skill1.text");
+  drawDebugTextGuide({ x: layout.skill2.nameX, y: layout.skill2.nameY, maxWidth: layout.skill2.nameMaxWidth, fontSize: layout.skill2.nameFontSize, align: "left" }, "skill2.name");
+  drawDebugRect(layout.skill2.textX, layout.skill2.textY, layout.skill2.textMaxWidth, layout.skill2.textHeight, "skill2.text");
+  drawDebugRect(layout.description.x, layout.description.y, layout.description.maxWidth, layout.description.height, "description");
+  drawDebugCircle(layout.attribute.x, layout.attribute.y, layout.attribute.radius, "attribute");
+  drawDebugCircle(layout.miniCharacter.x, layout.miniCharacter.y, layout.miniCharacter.radius, "miniCharacter");
+  drawDebugTextGuide(layout.cost, "cost");
+  drawDebugTextGuide(layout.cardNo, "cardNo");
+}
+
+function drawDebugTextGuide(layout, label) {
+  const left = layout.align === "right" ? layout.x - layout.maxWidth : layout.align === "center" ? layout.x - layout.maxWidth / 2 : layout.x;
+  drawDebugRect(left, layout.y - layout.fontSize / 2, layout.maxWidth, layout.fontSize, label);
+  drawDebugPoint(layout.x, layout.y);
+}
+
+function drawDebugBox(layout, label) {
+  drawDebugRect(layout.x, layout.y, layout.w, layout.h, label);
+}
+
+function drawDebugRect(x, y, w, h, label) {
+  ctx.save();
+  ctx.strokeStyle = "rgba(255, 0, 0, 0.7)";
+  ctx.fillStyle = "rgba(255, 0, 0, 0.08)";
+  ctx.lineWidth = 2;
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillStyle = "rgba(255, 0, 0, 0.9)";
+  ctx.font = makeFont(16, 700);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "bottom";
+  ctx.fillText(`${label} x:${Math.round(x)} y:${Math.round(y)}`, x + 4, y - 4);
+  ctx.restore();
+}
+
+function drawDebugCircle(x, y, radius, label) {
+  ctx.save();
+  ctx.strokeStyle = "rgba(0, 128, 255, 0.75)";
+  ctx.fillStyle = "rgba(0, 128, 255, 0.08)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "rgba(0, 128, 255, 0.95)";
+  ctx.font = makeFont(16, 700);
+  ctx.textAlign = "left";
+  ctx.textBaseline = "bottom";
+  ctx.fillText(`${label} x:${Math.round(x)} y:${Math.round(y)}`, x - radius, y - radius - 4);
+  ctx.restore();
+  drawDebugPoint(x, y);
+}
+
+function drawDebugPoint(x, y) {
+  ctx.save();
+  ctx.fillStyle = "rgba(0, 255, 128, 0.9)";
+  ctx.beginPath();
+  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function roundRect(x, y, w, h, r) {
@@ -552,7 +802,8 @@ function getCanvasPoint(event) {
 }
 
 function isInImageBox(x, y) {
-  return x >= 96 && x <= 928 && y >= 196 && y <= 890;
+  const imageBox = templateImage ? getTemplateLayout().mainImage : { x: 96, y: 196, w: 832, h: 694 };
+  return x >= imageBox.x && x <= imageBox.x + imageBox.w && y >= imageBox.y && y <= imageBox.y + imageBox.h;
 }
 
 function clamp(value, min, max) {
