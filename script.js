@@ -17,7 +17,7 @@ const defaults = {
   imageX: "0",
   imageY: "0",
   cardName: "エレキュート",
-  rarity: "SSR",
+  rarity: "R",
   cardType: "character",
   attribute: "雷",
   cardNo: "No.001",
@@ -138,16 +138,23 @@ async function loadTemplate() {
   templateKey = getTemplateKey();
   templateImage = null;
 
-  const templatePath = getTemplatePath(state.cardType, rarity.file);
-  const templateUrl = withTemplateCacheBuster(templatePath);
+  const templatePaths = [
+    getTemplatePath(state.cardType, rarity.file),
+    getTemplatePath("character", rarityMap.R.file)
+  ].filter((path, index, paths) => paths.indexOf(path) === index);
 
-  try {
-    console.log(`Loading card template: ${templatePath}`);
-    templateImage = await loadImage(templateUrl);
-    console.log(`Loaded card template: ${templatePath}`);
-  } catch (error) {
-    templateImage = null;
-    console.error(`Failed to load card template: ${templatePath}`, error);
+  for (const templatePath of templatePaths) {
+    const templateUrl = withTemplateCacheBuster(templatePath);
+
+    try {
+      console.log(`Loading card template URL: ${templateUrl}`);
+      templateImage = await loadImage(templateUrl);
+      console.log(`Loaded card template URL: ${templateUrl}`);
+      return;
+    } catch (error) {
+      templateImage = null;
+      console.error(`Failed to load card template URL: ${templateUrl}`, error);
+    }
   }
 }
 
