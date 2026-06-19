@@ -2,6 +2,7 @@ const CARD_WIDTH = 1024;
 const CARD_HEIGHT = 1536;
 const STORAGE_KEY = "tradingCardMakerState";
 const IMAGE_KEY = "tradingCardMakerImage";
+const TEMPLATE_CACHE_VERSION = "20260619";
 
 const rarityMap = {
   N: { label: "N", file: "normal.png", color: "#7d8790" },
@@ -16,7 +17,7 @@ const defaults = {
   imageX: "0",
   imageY: "0",
   cardName: "エレキュート",
-  rarity: "SSR",
+  rarity: "R",
   cardType: "character",
   attribute: "雷",
   cardNo: "No.001",
@@ -137,19 +138,33 @@ async function loadTemplate() {
   templateKey = getTemplateKey();
   templateImage = null;
 
-  const paths = [
-    `./assets/templates/${state.cardType}/${rarity.file}`,
-    `./assets/templates/${rarity.file}`
-  ];
+  const templatePaths = [
+    getTemplatePath(state.cardType, rarity.file),
+    getTemplatePath("character", rarityMap.R.file)
+  ].filter((path, index, paths) => paths.indexOf(path) === index);
 
-  for (const path of paths) {
+  for (const templatePath of templatePaths) {
+    const templateUrl = withTemplateCacheBuster(templatePath);
+
     try {
-      templateImage = await loadImage(path);
+      console.log(`Loading card template URL: ${templateUrl}`);
+      templateImage = await loadImage(templateUrl);
+      console.log(`Loaded card template URL: ${templateUrl}`);
       return;
-    } catch {
+    } catch (error) {
       templateImage = null;
+      console.error(`Failed to load card template URL: ${templateUrl}`, error);
     }
   }
+}
+
+function getTemplatePath(cardType, rarityFile) {
+  const safeCardType = cardType === "item" ? "item" : "character";
+  return `assets/templates/${safeCardType}/${rarityFile}`;
+}
+
+function withTemplateCacheBuster(path) {
+  return `./${path}?v=${TEMPLATE_CACHE_VERSION}`;
 }
 
 function loadImage(src) {
