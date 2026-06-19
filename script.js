@@ -178,6 +178,13 @@ function loadImage(src) {
 
 function drawCard() {
   ctx.clearRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+
+  if (templateImage) {
+    drawCharacterImage({ drawBackground: false, drawPlaceholder: false, drawFrame: false });
+    drawTemplateOverlay();
+    return;
+  }
+
   drawBase();
   drawCharacterImage();
   drawTemplateOverlay();
@@ -211,17 +218,19 @@ function drawBase() {
   ctx.restore();
 }
 
-function drawCharacterImage() {
+function drawCharacterImage({ drawBackground = true, drawPlaceholder = true, drawFrame = true } = {}) {
   const imageBox = { x: 96, y: 196, w: 832, h: 694 };
   ctx.save();
   roundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, 26);
   ctx.clip();
 
-  const bg = ctx.createLinearGradient(96, 196, 928, 890);
-  bg.addColorStop(0, "#fff7cf");
-  bg.addColorStop(1, "#b58a54");
-  ctx.fillStyle = bg;
-  ctx.fillRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h);
+  if (drawBackground) {
+    const bg = ctx.createLinearGradient(96, 196, 928, 890);
+    bg.addColorStop(0, "#fff7cf");
+    bg.addColorStop(1, "#b58a54");
+    ctx.fillStyle = bg;
+    ctx.fillRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h);
+  }
 
   if (characterImage) {
     const scale = Number(state.imageScale || 1);
@@ -231,7 +240,7 @@ function drawCharacterImage() {
     const drawX = imageBox.x + imageBox.w / 2 - drawW / 2 + Number(state.imageX || 0);
     const drawY = imageBox.y + imageBox.h / 2 - drawH / 2 + Number(state.imageY || 0);
     ctx.drawImage(characterImage, drawX, drawY, drawW, drawH);
-  } else {
+  } else if (drawPlaceholder) {
     ctx.fillStyle = "rgba(255,255,255,0.5)";
     ctx.font = makeFont(42, 800);
     ctx.textAlign = "center";
@@ -242,8 +251,10 @@ function drawCharacterImage() {
   }
   ctx.restore();
 
-  strokeRoundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, 26, "#3a2112", 8);
-  strokeRoundRect(imageBox.x + 12, imageBox.y + 12, imageBox.w - 24, imageBox.h - 24, 18, "rgba(255,255,255,0.55)", 3);
+  if (drawFrame) {
+    strokeRoundRect(imageBox.x, imageBox.y, imageBox.w, imageBox.h, 26, "#3a2112", 8);
+    strokeRoundRect(imageBox.x + 12, imageBox.y + 12, imageBox.w - 24, imageBox.h - 24, 18, "rgba(255,255,255,0.55)", 3);
+  }
 }
 
 function drawTemplateOverlay() {
