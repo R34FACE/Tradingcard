@@ -2,6 +2,7 @@ const CARD_WIDTH = 1024;
 const CARD_HEIGHT = 1536;
 const STORAGE_KEY = "tradingCardMakerState";
 const IMAGE_KEY = "tradingCardMakerImage";
+const TEMPLATE_CACHE_VERSION = "20260619";
 
 const rarityMap = {
   N: { label: "N", file: "normal.png", color: "#7d8790" },
@@ -137,19 +138,26 @@ async function loadTemplate() {
   templateKey = getTemplateKey();
   templateImage = null;
 
-  const paths = [
-    `./assets/templates/${state.cardType}/${rarity.file}`,
-    `./assets/templates/${rarity.file}`
-  ];
+  const templatePath = getTemplatePath(state.cardType, rarity.file);
+  const templateUrl = withTemplateCacheBuster(templatePath);
 
-  for (const path of paths) {
-    try {
-      templateImage = await loadImage(path);
-      return;
-    } catch {
-      templateImage = null;
-    }
+  try {
+    console.log(`Loading card template: ${templatePath}`);
+    templateImage = await loadImage(templateUrl);
+    console.log(`Loaded card template: ${templatePath}`);
+  } catch (error) {
+    templateImage = null;
+    console.error(`Failed to load card template: ${templatePath}`, error);
   }
+}
+
+function getTemplatePath(cardType, rarityFile) {
+  const safeCardType = cardType === "item" ? "item" : "character";
+  return `assets/templates/${safeCardType}/${rarityFile}`;
+}
+
+function withTemplateCacheBuster(path) {
+  return `./${path}?v=${TEMPLATE_CACHE_VERSION}`;
 }
 
 function loadImage(src) {
