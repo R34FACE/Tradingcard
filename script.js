@@ -22,8 +22,8 @@ const TEMPLATE_LAYOUT = {
       stats: {
         hp: { x: 255, y: 952, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
         atk: { x: 255, y: 1035, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
-        def: { x: 255, y: 1120, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
-        spd: { x: 255, y: 1200, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 }
+        def: { x: 255, y: 1117, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
+        spd: { x: 255, y: 1197, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 }
       },
       skill1: {
         nameX: 410,
