@@ -20,7 +20,7 @@ const TEMPLATE_LAYOUT = {
       mainImage: { x: 92, y: 190, w: 840, h: 690, radius: 26 },
       cardName: { x: 512, y: 118, maxWidth: 510, fontSize: 48, align: "center", color: "#fff7db", weight: 900 },
       stats: {
-        hp: { x: 25, y: 953, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
+        hp: { x: 255, y: 953, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
         atk: { x: 255, y: 1020, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
         def: { x: 255, y: 1090, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
         spd: { x: 255, y: 1160, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 }
