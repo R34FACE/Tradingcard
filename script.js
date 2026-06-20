@@ -21,9 +21,9 @@ const TEMPLATE_LAYOUT = {
       cardName: { x: 512, y: 118, maxWidth: 510, fontSize: 48, align: "center", color: "#fff7db", weight: 900 },
       stats: {
         hp: { x: 245, y: 953, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
-        atk: { x: 308, y: 1013, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
-        def: { x: 308, y: 1083, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
-        spd: { x: 308, y: 1153, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 }
+        atk: { x: 245, y: 1000, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
+        def: { x: 245, y: 1070, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 },
+        spd: { x: 245, y: 1140, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 }
       },
       skill1: {
         nameX: 410,
