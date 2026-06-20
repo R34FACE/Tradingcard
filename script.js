@@ -34,7 +34,7 @@ const TEMPLATE_LAYOUT = {
         powerY: 1034,
         powerMaxWidth: 92,
         powerFontSize: 38,
-        textX: 360,
+        textX: 300,
         textY: 1080,
         textMaxWidth: 470,
         textHeight: 88,
