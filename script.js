@@ -26,8 +26,8 @@ const TEMPLATE_LAYOUT = {
         spd: { x: 255, y: 1197, maxWidth: 120, fontSize: 38, align: "right", color: "#fff7e0", weight: 900 }
       },
       skill1: {
-        nameX: 430,
-        nameY: 1020,
+        nameX: 435,
+        nameY: 1050,
         nameMaxWidth: 330,
         nameFontSize: 34,
         powerX: 830,
